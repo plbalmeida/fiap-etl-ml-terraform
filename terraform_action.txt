@@ -1,1 +1,1 @@
-destroy
+apply
