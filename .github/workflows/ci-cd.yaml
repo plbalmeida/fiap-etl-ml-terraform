@@ -127,6 +127,7 @@ jobs:
 
       - name: Run tests
         run: |
+          export PYTHONPATH=.
           pytest ./src/tests
 
   iam:
