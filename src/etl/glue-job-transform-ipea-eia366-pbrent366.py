@@ -1,14 +1,13 @@
 import sys
 import logging
 import boto3
-import time
 from awsglue.context import GlueContext
 from awsglue.utils import getResolvedOptions
 from awsglue.job import Job
 from pyspark.context import SparkContext
 from pyspark.sql.functions import (
-    avg, 
-    col, 
+    avg,
+    col,
     concat,
     current_date,
     date_format,

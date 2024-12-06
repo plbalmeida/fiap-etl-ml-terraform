@@ -74,7 +74,7 @@ def train():
     mape = mean_absolute_percentage_error(y_test, y_pred, multioutput="raw_values")  # noqa
 
     models_performance = pd.DataFrame({
-        "Previsão": [f"M+{i}" for i in range(1, 6+1)],
+        "Previsão": [f"M+{i}" for i in range(1, 6 + 1)],
         "Mean Absolute Error": mae,
         "Mean Absolute Percentage Error": mape
     })

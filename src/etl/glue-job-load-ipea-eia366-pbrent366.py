@@ -1,7 +1,6 @@
 import sys
 import logging
 import boto3
-import time
 from awsglue.context import GlueContext
 from awsglue.utils import getResolvedOptions
 from awsglue.job import Job
