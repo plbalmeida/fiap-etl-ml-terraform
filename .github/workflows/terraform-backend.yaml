@@ -1,0 +1,153 @@
+name: Setup Terraform Backend
+
+on: 
+  push:
+    branches:
+      - terraform-backend
+
+jobs:
+
+  terraform-backend-s3:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+    
+    - name: Terraform Init and Apply for ECR registry for ML image Terraform backend
+      run: |
+        cd infra/terraform-backend/ecr/s3
+        terraform init
+        terraform apply -auto-approve
+
+    - name: Terraform Init and Apply for Glue ETL jobs Terraform backend
+      run: |
+        cd infra/terraform-backend/glue/s3
+        terraform init
+        terraform apply -auto-approve
+
+    - name: Terraform Init and Apply for IAM role Terraform backend
+      run: |
+        cd infra/terraform-backend/iam/s3
+        terraform init
+        terraform apply -auto-approve
+
+    - name: Terraform Init and Apply for Lambda function Terraform backend
+      run: |
+        cd infra/terraform-backend/lambda/s3
+        terraform init
+        terraform apply -auto-approve
+
+    - name: Terraform Init and Apply for S3 bucket Terraform backend
+      run: |
+        cd infra/terraform-backend/s3/s3
+        terraform init
+        terraform apply -auto-approve
+
+    - name: Terraform Init and Apply for Step Functions state machine Terraform backend
+      run: |
+        cd infra/terraform-backend/stepfunctions/s3
+        terraform init
+        terraform apply -auto-approve
+
+  terraform-backend-dynamodb:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Terraform Init and Apply for ECR registry for ML image Terraform backend
+      run: |
+        cd infra/terraform-backend/ecr/dynamodb
+        terraform init
+        terraform apply -auto-approve
+
+    - name: Terraform Init and Apply for Glue ETL jobs Terraform backend
+      run: |
+        cd infra/terraform-backend/glue/dynamodb
+        terraform init
+        terraform apply -auto-approve
+
+    - name: Terraform Init and Apply for IAM role Terraform backend
+      run: |
+        cd infra/terraform-backend/iam/dynamodb
+        terraform init
+        terraform apply -auto-approve
+
+    - name: Terraform Init and Apply for Lambda function Terraform backend
+      run: |
+        cd infra/terraform-backend/lambda/dynamodb
+        terraform init
+        terraform apply -auto-approve
+
+    - name: Terraform Init and Apply for S3 bucket Terraform backend
+      run: |
+        cd infra/terraform-backend/s3/dynamodb
+        terraform init
+        terraform apply -auto-approve
+
+    - name: Terraform Init and Apply for Step Functions state machine Terraform backend
+      run: |
+        cd infra/terraform-backend/stepfunctions/dynamodb
+        terraform init
+        terraform apply -auto-approve
+  
+  terraform-backend-iam:
+    runs-on: ubuntu-latest
+    needs: [terraform-backend-s3, terraform-backend-dynamodb]
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Terraform Init and Apply for ECR registry for ML image Terraform backend
+      run: |
+        cd infra/terraform-backend/ecr/iam
+        terraform init
+        terraform apply -auto-approve
+
+    - name: Terraform Init and Apply for Glue ETL jobs Terraform backend
+      run: |
+        cd infra/terraform-backend/glue/iam
+        terraform init
+        terraform apply -auto-approve
+
+    - name: Terraform Init and Apply for IAM role Terraform backend
+      run: |
+        cd infra/terraform-backend/iam/iam
+        terraform init
+        terraform apply -auto-approve
+
+    - name: Terraform Init and Apply for Lambda function Terraform backend
+      run: |
+        cd infra/terraform-backend/lambda/iam
+        terraform init
+        terraform apply -auto-approve
+
+    - name: Terraform Init and Apply for S3 bucket Terraform backend
+      run: |
+        cd infra/terraform-backend/s3/iam
+        terraform init
+        terraform apply -auto-approve
+
+    - name: Terraform Init and Apply for Step Functions state machine Terraform backend
+      run: |
+        cd infra/terraform-backend/stepfunctions/iam
+        terraform init
+        terraform apply -auto-approve
