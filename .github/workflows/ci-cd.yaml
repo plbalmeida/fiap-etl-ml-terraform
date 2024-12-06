@@ -7,7 +7,74 @@ on:
 
 jobs:
 
+  set-env:
+    runs-on: ubuntu-latest
+    outputs:
+      action: ${{ steps.read_action.outputs.action }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Read Terraform action from file
+        id: read_action
+        run: |
+          ACTION=$(cat terraform_action.txt)
+          echo "::set-output name=action::${ACTION}"
+      
+  destroy:
+    needs: set-env
+    if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'destroy'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Removing files from S3 bucket in case of destroy command
+      run: |
+          aws s3 rm s3://s3-bucket-ipea-eia366-pbrent366/ --recursive
+    
+    - name: Terraform Init and Destroy Step Functions state machine
+      run: |
+        cd infra/stepfunctions
+        terraform init
+        terraform plan
+        terraform destroy -auto-approve
+
+    - name: Terraform Init and Destroy ECR repository
+      run: |
+        cd infra/ecr
+        terraform init
+        terraform plan
+        terraform destroy -auto-approve
+
+    - name: Terraform Init and Destroy Lambda function
+      run: |
+        cd infra/lambda
+        terraform init
+        terraform plan
+        terraform destroy -auto-approve
+    
+    - name: Terraform Init and Destroy Glue jobs
+      run: |
+        cd infra/glue
+        terraform init
+        terraform plan
+        terraform destroy -auto-approve
+
+    - name: Terraform Init and Destroy S3 bucket
+      run: |
+        cd infra/s3
+        terraform init
+        terraform plan
+        terraform destroy -auto-approve
+
+    - name: Terraform Init and Destroy IAM role
+      run: |
+        cd infra/iam
+        terraform init
+        terraform plan
+        terraform destroy -auto-approve
+
   lint:
+    needs: set-env
+    if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -27,7 +94,8 @@ jobs:
           flake8 ./src --ignore=E501
 
   test:
-    needs: lint
+    needs: [lint, set-env]
+    if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -47,8 +115,8 @@ jobs:
           pytest ./src/tests
 
   iam:
-    if: github.ref == 'refs/heads/main'
-    needs: test
+    needs: [test, set-env]
+    if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -66,29 +134,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Read Terraform action from file
-        id: read_action
-        run: |
-          ACTION=$(cat terraform_action.txt)
-          echo "ACTION=${ACTION}" >> $GITHUB_ENV
-
-      - name: Terraform Init and Apply/Destroy
+      - name: Terraform Init and Apply
         run: |
           cd infra/iam
           terraform init
           terraform plan
-          if [ "${{ env.ACTION }}" == "apply" ]; then
-            terraform apply -auto-approve
-          elif [ "${{ env.ACTION }}" == "destroy" ]; then
-            terraform destroy -auto-approve
-          else
-            echo "Invalid action specified in terraform-action.txt"
-            exit 1
-          fi
+          terraform apply -auto-approve
 
   s3:
-    if: github.ref == 'refs/heads/main'
-    needs: iam
+    needs: [iam, set-env]
+    if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -106,35 +161,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Read Terraform action from file
-        id: read_action
-        run: |
-          ACTION=$(cat terraform_action.txt)
-          echo "ACTION=${ACTION}" >> $GITHUB_ENV
-
-      - name: Removing files from S3 bucket in case of destroy command
-        run: |
-          if [ "${{ env.ACTION }}" == "destroy" ]; then
-            aws s3 rm s3://s3-bucket-ipea-eia366-pbrent366/ --recursive
-          fi
-
-      - name: Terraform Init and Apply/Destroy
+      - name: Terraform Init and Apply
         run: |
           cd infra/s3
           terraform init
           terraform plan
-          if [ "${{ env.ACTION }}" == "apply" ]; then
-            terraform apply -auto-approve
-          elif [ "${{ env.ACTION }}" == "destroy" ]; then
-            terraform destroy -auto-approve
-          else
-            echo "Invalid action specified in terraform-action.txt"
-            exit 1
-          fi
+          terraform apply -auto-approve
 
   glue:
-    if: github.ref == 'refs/heads/main'
-    needs: s3
+    needs: [s3, set-env]
+    if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -152,37 +188,20 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Read Terraform action from file
-        id: read_action
-        run: |
-          ACTION=$(cat terraform_action.txt)
-          echo "ACTION=${ACTION}" >> $GITHUB_ENV
-
-      - name: Terraform Init and Apply/Destroy
+      - name: Terraform Init and Apply
         run: |
           cd infra/glue
           terraform init
           terraform plan
-          if [ "${{ env.ACTION }}" == "apply" ]; then
-            terraform apply -auto-approve
-          elif [ "${{ env.ACTION }}" == "destroy" ]; then
-            terraform destroy -auto-approve
-          else
-            echo "Invalid action specified in terraform-action.txt"
-            exit 1
-          fi
+          terraform apply -auto-approve
 
       - name: Upload Python scripts to S3
         run: |
-          if [ "${{ env.ACTION }}" == "apply" ]; then
             aws s3 cp src/etl/ s3://s3-bucket-ipea-eia366-pbrent366/scripts/ --recursive --exclude "*" --include "*.py"
-          elif [ "${{ env.ACTION }}" == "destroy" ]; then
-            aws s3 rm s3://s3-bucket-ipea-eia366-pbrent366/scripts/ --recursive --exclude "*" --include "*.py"
-          fi
 
   ecr:
-    if: github.ref == 'refs/heads/main'
-    needs: iam
+    needs: [iam, set-env]
+    if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -200,25 +219,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Read Terraform action from file
-        id: read_action
-        run: |
-          ACTION=$(cat terraform_action.txt)
-          echo "ACTION=${ACTION}" >> $GITHUB_ENV
-
-      - name: Terraform Init and Apply/Destroy
+      - name: Terraform Init and Apply
         run: |
           cd infra/ecr
           terraform init
           terraform plan
-          if [ "${{ env.ACTION }}" == "apply" ]; then
-            terraform apply -auto-approve
-          elif [ "${{ env.ACTION }}" == "destroy" ]; then
-            terraform destroy -auto-approve
-          else
-            echo "Invalid action specified in terraform-action.txt"
-            exit 1
-          fi
+          terraform apply -auto-approve
       
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
@@ -228,19 +234,15 @@ jobs:
   
       - name: Build Docker image locally
         run: |
-          if [ "${{ env.ACTION }}" == "apply" ]; then
             docker build -t 413467296690.dkr.ecr.us-east-1.amazonaws.com/ecr-ipea-eia366-pbrent366:latest -f ./Dockerfile .
-          fi
   
       - name: Push Docker image to Amazon ECR
         run: |
-          if [ "${{ env.ACTION }}" == "apply" ]; then
             docker push 413467296690.dkr.ecr.us-east-1.amazonaws.com/ecr-ipea-eia366-pbrent366:latest
-          fi
 
   lambda:
-    if: github.ref == 'refs/heads/main'
-    needs: iam
+    needs: [iam, set-env]
+    if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -257,12 +259,6 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-
-      - name: Read Terraform action from file
-        id: read_action
-        run: |
-          ACTION=$(cat terraform_action.txt)
-          echo "ACTION=${ACTION}" >> $GITHUB_ENV
 
       - name: Zip Lambda function
         run: |
@@ -270,23 +266,16 @@ jobs:
           zip -r ../../infra/lambda/lambda_function.zip lambda_function.py
         working-directory: .
 
-      - name: Terraform Init and Apply/Destroy
+      - name: Terraform Init and Apply
         run: |
           cd infra/lambda
           terraform init
           terraform plan
-          if [ "${{ env.ACTION }}" == "apply" ]; then
-            terraform apply -auto-approve
-          elif [ "${{ env.ACTION }}" == "destroy" ]; then
-            terraform destroy -auto-approve
-          else
-            echo "Invalid action specified in terraform-action.txt"
-            exit 1
-          fi
+          terraform apply -auto-approve
 
   stepfunctions:
-    if: github.ref == 'refs/heads/main'
-    needs: [iam, s3, glue, ecr, lambda]
+    needs: [iam, s3, glue, ecr, lambda, set-env]
+    if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -304,22 +293,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Read Terraform action from file
-        id: read_action
-        run: |
-          ACTION=$(cat terraform_action.txt)
-          echo "ACTION=${ACTION}" >> $GITHUB_ENV
-
-      - name: Terraform Init and Apply/Destroy
+      - name: Terraform Init and Apply
         run: |
           cd infra/stepfunctions
           terraform init
           terraform plan
-          if [ "${{ env.ACTION }}" == "apply" ]; then
-            terraform apply -auto-approve
-          elif [ "${{ env.ACTION }}" == "destroy" ]; then
-            terraform destroy -auto-approve
-          else
-            echo "Invalid action specified in terraform-action.txt"
-            exit 1
-          fi
+          terraform apply -auto-approve
