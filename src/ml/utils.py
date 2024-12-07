@@ -20,7 +20,7 @@ def target_transform(train, target, horizon):
         `target_t{i+1}`, onde `i` é o número do passo.
 
     Example:
-        >>> train = pd.DataFrame({'target': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]})
+        >>> train = pd.DataFrame({'target': [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]})
         >>> target_transform(train, 'target', 3)
            target_t1  target_t2  target_t3
         0        2.0        3.0        4.0
