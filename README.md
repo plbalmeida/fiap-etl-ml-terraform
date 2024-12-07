@@ -102,10 +102,10 @@ No [MLOps](https://cloud.google.com/architecture/mlops-continuous-delivery-and-a
 
 [GitHub Actions](https://github.com/features/actions) é uma plataforma de automação integrada ao GitHub que permite configurar fluxos de trabalho personalizados para tarefas de CI/CD utilizando um arquivo YAML.
 
-O .yaml está em ``.github/workflows/`, o `ci-cd.yaml` define uma esteira CI/CD para gerenciar a infraestrutura de aplicações da AWS usando Terraform. Ele contém múltiplos *jobs*, incluindo etapas para destruir ou aplicar recursos AWS (como IAM, S3, Glue, ECR, Lambda e Step Functions), além de verificar e testar o código. Aqui estão os principais pontos desse arquivo:
+O .yaml está em `.github/workflows/`, o `ci-cd.yaml` define uma esteira CI/CD para gerenciar a infraestrutura de aplicações da AWS usando Terraform. Ele contém múltiplos *jobs*, incluindo etapas para destruir ou aplicar recursos AWS (como IAM, S3, Glue, ECR, Lambda e Step Functions), além de verificar e testar o código. Aqui estão os principais pontos desse arquivo:
 
 1. **Gatilho de Execução**:  
-   O fluxo é acionado por *push* na branch `main`. Ele decide entre aplicar ou destruir recursos com base no conteúdo do arquivo `terraform_action.txt`.
+   O fluxo é acionado por *push* na branch `main`. Ele decide entre aplicar ou destruir recursos com base no conteúdo do arquivo `terraform_action.txt`. Se o `terraform_action.txt` conter **apply** os recursos serão provisionados, se conter **destroy** os recursos serão destruídos. 
 
 2. **Jobs**:  
    - **`set-env`**: Lê o comando (`apply` ou `destroy`) para direcionar os fluxos subsequentes.
