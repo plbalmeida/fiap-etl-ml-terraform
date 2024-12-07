@@ -18,4 +18,6 @@ def test_target_transform():
 
     result = target_transform(train, target, horizon)
     print(result)
+    print("expected_output")
+    print(expected_output)
     pd.testing.assert_frame_equal(result, expected_output)  # noqa
