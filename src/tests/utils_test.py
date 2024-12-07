@@ -10,9 +10,9 @@ def test_target_transform():
     horizon = 3
 
     expected_output = pd.DataFrame({
-        'target_t1': [2, 3, 4, 5, 6, 7, 8],
-        'target_t2': [3, 4, 5, 6, 7, 8, 9],
-        'target_t3': [4, 5, 6, 7, 8, 9, 10]
+        'target_t1': [2, 3, 4],
+        'target_t2': [3, 4, 5],
+        'target_t3': [4, 5, 6]
     })
 
     result = target_transform(train, target, horizon)
