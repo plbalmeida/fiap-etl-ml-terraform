@@ -31,6 +31,7 @@ def target_transform(train, target, horizon):
         5        7.0        8.0        9.0
         6        8.0        9.0       10.0
     """  # noqa 401
-    y = pd.concat([train[target].shift(-i) for i in range(0, horizon)], axis=1).dropna()  # noqa 401
-    y.columns = [f"{target}_t{i+1}" for i in range(0, horizon)]
+    y = pd.concat([train[target].shift(-i) for i in range(1, horizon + 1)], axis=1)  # noqa
+    y.columns = [f"{target}_t{i}" for i in range(1, horizon + 1)]
+    y = y.iloc[:-horizon]
     return y
