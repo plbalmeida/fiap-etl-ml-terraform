@@ -146,3 +146,6 @@ Para executar a esteira de CI/CD é necessário fazer um push para branch `main`
 - `Esteira de CI/CD e arquivos do Terraform`:
     * É necessário parametrizar dados como `região` e `id` da conta AWS de modo que facilite reproduzir a solução;
     * Na esteira de CI/CD seria importante ter um job para checar cobertura de código, como o [Coverage.py](https://coverage.readthedocs.io/en/7.6.9/)
+
+- `Versionamento de código`:
+   * Para efeito didático, a solução está toda nesse único repositório, porém o ideal é ter cada componente da solução com seu próprio repositório.
