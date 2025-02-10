@@ -1,3 +1,5 @@
+credentials.sh
+
 .terraform
 .terraform.lock.hcl
 terraform.tfstate
