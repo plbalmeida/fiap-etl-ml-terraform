@@ -1,9 +1,5 @@
-# variable "role_name" {
-#   default = "iam-role-ipea-eia366-pbrent366"
-# }
-
 variable "role_name" {
-  default = "LabRole"
+  default = "iam-role-ipea-eia366-pbrent366"
 }
 
 variable "script_location" {
