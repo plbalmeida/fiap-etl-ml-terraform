@@ -160,7 +160,7 @@ jobs:
 
   s3:
     # needs: [iam, set-env]
-    needs: [set-env]
+    needs: [test, set-env]
     if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
@@ -188,7 +188,7 @@ jobs:
           terraform apply -auto-approve
 
   glue:
-    needs: [s3, set-env]
+    needs: [test, s3, set-env]
     if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
@@ -221,7 +221,7 @@ jobs:
 
   ecr:
     # needs: [iam, set-env]
-    needs: [set-env]
+    needs: [test, set-env]
     if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
@@ -264,7 +264,7 @@ jobs:
 
   lambda:
     # needs: [iam, set-env]
-    needs: [set-env]
+    needs: [test, set-env]
     if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
@@ -299,7 +299,7 @@ jobs:
 
   stepfunctions:
     # needs: [iam, s3, glue, ecr, lambda, set-env]
-    needs: [s3, glue, ecr, lambda, set-env]
+    needs: [test, s3, glue, ecr, lambda, set-env]
     if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
