@@ -153,3 +153,4 @@ Para executar a esteira de CI/CD é necessário fazer um push para branch `main`
 
 - `Versionamento de código`:
    * Para efeito didático, a solução está toda nesse único repositório, porém o ideal é ter cada componente da solução com seu próprio repositório.
+   
