@@ -1,6 +1,6 @@
 # referência para a role IAM
 data "aws_iam_role" "exec_role" {
-  name = "LabRole"
+  name = "iam-role-ipea-eia366-pbrent366"
 }
 
 resource "aws_sfn_state_machine" "state_machine" {
