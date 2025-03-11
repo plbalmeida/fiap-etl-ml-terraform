@@ -31,7 +31,7 @@ resource "aws_iam_policy" "policy" {
           "s3:DeleteObject"
         ],
         Resource = [
-          "arn:aws:s3:::terraform-backend-${var.component_name}",
+          "arn:aws:s3:::terraform-backend-${var.component_name}-",
           "arn:aws:s3:::terraform-backend-${var.component_name}/*"
         ]
       },
