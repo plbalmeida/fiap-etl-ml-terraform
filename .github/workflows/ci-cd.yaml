@@ -125,7 +125,7 @@ jobs:
           pytest ./src/tests
 
   s3:
-    needs: [test, set-env]
+    needs: [lint, test, set-env]
     if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
@@ -152,7 +152,7 @@ jobs:
           terraform apply -auto-approve
 
   glue:
-    needs: [test, s3, set-env]
+    needs: [lint, test, s3, set-env]
     if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
@@ -183,7 +183,7 @@ jobs:
             aws s3 cp src/etl/ s3://s3-bucket-ipea-eia366-pbrent366/scripts/ --recursive --exclude "*" --include "*.py"
 
   ecr:
-    needs: [set-env]
+    needs: [lint, set-env]
     if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
@@ -224,7 +224,7 @@ jobs:
             docker push 413467296690.dkr.ecr.us-east-1.amazonaws.com/ecr-ipea-eia366-pbrent366:latest
 
   lambda:
-    needs: [set-env]
+    needs: [lint, set-env]
     if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
@@ -257,7 +257,7 @@ jobs:
           terraform apply -auto-approve
 
   stepfunctions:
-    needs: [s3, glue, ecr, lambda, set-env]
+    needs: [lint, s3, glue, ecr, lambda, set-env]
     if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
