@@ -24,7 +24,7 @@ jobs:
       
   destroy:
     needs: set-env
-    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/aws-academy') && needs.set-env.outputs.action == 'apply'
+    if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'destroy'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -83,7 +83,7 @@ jobs:
 
   lint:
     needs: set-env
-    if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/aws-academy') && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -104,7 +104,7 @@ jobs:
 
   test:
     needs: [set-env, lint]
-    if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/aws-academy') && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -126,7 +126,7 @@ jobs:
 
   s3:
     needs: [set-env, test]
-    if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/aws-academy') && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -153,7 +153,7 @@ jobs:
 
   glue:
     needs: [set-env, test, s3]
-    if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/aws-academy') && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -184,7 +184,7 @@ jobs:
 
   ecr:
     needs: [set-env, test]
-    if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/aws-academy') && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -225,7 +225,7 @@ jobs:
 
   lambda:
     needs: [set-env, test]
-    if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/aws-academy') && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -258,7 +258,7 @@ jobs:
 
   stepfunctions:
     needs: [set-env, s3, glue, ecr, lambda]
-    if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'apply'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/aws-academy') && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
