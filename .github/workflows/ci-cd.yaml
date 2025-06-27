@@ -24,7 +24,7 @@ jobs:
       
   destroy:
     needs: set-env
-    if: github.ref == 'refs/heads/main' && needs.set-env.outputs.action == 'destroy'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/aws-academy') && needs.set-env.outputs.action == 'apply'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
