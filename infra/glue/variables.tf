@@ -1,5 +1,5 @@
 variable "role_name" {
-  default = "iam-role-ipea-eia366-pbrent366"
+  default = "LabRole"
 }
 
 variable "script_location" {

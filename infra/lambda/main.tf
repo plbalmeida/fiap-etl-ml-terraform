@@ -1,5 +1,5 @@
 data "aws_iam_role" "exec_role" {
-  name = "iam-role-ipea-eia366-pbrent366"
+  name = "LabRole"
 }
 
 resource "aws_lambda_function" "generate_training_vars" {
