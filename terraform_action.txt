@@ -1,1 +1,1 @@
-deactivate
+destroy
